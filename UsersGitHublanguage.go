@@ -49,5 +49,11 @@ func main() {
 	   go result.add(*v.Name,login,client,&wg)
 	}
 	wg.Wait()
-	fmt.Println(result)
+	for k,v := range result.Statistic {
+		fmt.Println(k)
+		for _,pers := range v {
+			fmt.Printf("%v %v \n", pers.Lang,pers.Value)
+		}
+		fmt.Println("#####")
+	}
 }
