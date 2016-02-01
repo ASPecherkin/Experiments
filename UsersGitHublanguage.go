@@ -14,16 +14,10 @@ type LangValue struct {
 	Value int
 }
 
-// RepoLang struct for identify repo with his used languages
-type RepoLang struct {
-	RepName string
-    langs LangValue
-}
-
 // Stats for concurrency accessible slice from goroutines
 type Stats struct {
 	sync.RWMutex
-	Statistic []RepoLang
+	Statistic map[string][]LangValue
 }
 
 func (s *Stats) add(name, login string, client *github.Client, wg *sync.WaitGroup, ) {
@@ -35,25 +29,24 @@ func (s *Stats) add(name, login string, client *github.Client, wg *sync.WaitGrou
 	}
 	s.Lock()
     for k,v := range langs {
-		tlang := LangValue{Lang:k, Value: v}
-		s.Statistic = append(s.Statistic, RepoLang{RepName:name, langs:tlang})
+	    s.Statistic[name] = append(s.Statistic[name], LangValue{Lang:k, Value: v})
 	}
 }
 
 func main() {
 	login := os.Args[1]
-	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken:"some token"})
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken:"..."})
 	tc := oauth2.NewClient(oauth2.NoContext,ts)
 	client := github.NewClient(tc)
-	result := Stats{Statistic:make([]RepoLang,0,0)}
+	result := Stats{Statistic:make(map[string][]LangValue)}
 	var wg sync.WaitGroup
 	repos, _, err := client.Repositories.List(login, nil)
 	if err != nil {
 		fmt.Println(err)
 	}
 	for _, v := range repos {
-		wg.Add(1)
-		go result.add(*v.Name,login,client,&wg)
+	   wg.Add(1)
+	   go result.add(*v.Name,login,client,&wg)
 	}
 	wg.Wait()
 	fmt.Println(result)
