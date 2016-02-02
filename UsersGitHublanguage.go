@@ -41,19 +41,19 @@ func (s *Stats) add(name, login string, client *github.Client, wg *sync.WaitGrou
 }
 
 func main() {
-	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken:"some token here"})
+	login := os.Args[1]
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken:"some token"})
 	tc := oauth2.NewClient(oauth2.NoContext,ts)
 	client := github.NewClient(tc)
 	result := Stats{Statistic:make([]RepoLang,0,0)}
 	var wg sync.WaitGroup
-	repos, _, err := client.Repositories.List(os.Args[1], nil)
+	repos, _, err := client.Repositories.List(login, nil)
 	if err != nil {
 		fmt.Println(err)
 	}
 	for _, v := range repos {
-		fmt.Println(*v.Name)
 		wg.Add(1)
-		go result.add(*v.Name,"envek",client,&wg)
+		go result.add(*v.Name,login,client,&wg)
 	}
 	wg.Wait()
 	fmt.Println(result)
