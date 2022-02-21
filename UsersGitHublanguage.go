@@ -14,6 +14,7 @@ import (
 type LangValue struct {
 	Lang  string
 	Value int
+	Type string
 }
 
 // Stats for concurrency accessible slice from goroutines
